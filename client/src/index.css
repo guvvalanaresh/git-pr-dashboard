@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 2%;
+    --foreground: 210 40% 98%;
+    --card: 210 40% 8%;
+    --card-foreground: 210 40% 98%;
+    --popover: 210 40% 8%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 210 40% 15%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 210 40% 15%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 210 40% 18%;
+    --input: 210 40% 18%;
+    --ring: 142 76% 36%;
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  }
+}
+
+/* GitHub-inspired custom styles */
+.github-card {
+  @apply bg-github-surface border border-github-border rounded-lg p-4 hover:border-github-muted transition-colors;
+}
+
+.github-button {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium transition-colors;
+}
+
+.github-button-secondary {
+  @apply bg-secondary text-secondary-foreground hover:bg-secondary/90 px-4 py-2 rounded-md font-medium transition-colors;
+}
+
+.github-input {
+  @apply bg-github-surface border border-github-border text-github-text placeholder-github-muted rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+}
+
+.github-text {
+  @apply text-github-text;
+}
+
+.github-text-muted {
+  @apply text-github-muted;
+}
