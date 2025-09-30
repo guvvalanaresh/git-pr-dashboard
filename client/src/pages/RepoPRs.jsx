@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
-import { Github, ArrowLeft, MessageSquare, User, Calendar, GitBranch, CheckCircle, XCircle, GitMerge } from 'lucide-react';
+import { Github, ArrowLeft, MessageSquare, User, Calendar, GitBranch, CheckCircle, XCircle, GitMerge, Moon, Sun, Plus } from 'lucide-react';
 import axios from 'axios';
 
 const RepoPRs = () => {
@@ -16,9 +16,29 @@ const RepoPRs = () => {
   const [comment, setComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [filter, setFilter] = useState('all'); // 'all', 'open', 'closed'
+  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [showCreatePR, setShowCreatePR] = useState(false);
+  const [newPR, setNewPR] = useState({ title: '', base: 'main', head: '', body: '' });
+  const [creatingPR, setCreatingPR] = useState(false);
+  const [branches, setBranches] = useState({ default_branch: 'main', branches: [] });
 
   useEffect(() => {
     fetchPullRequests();
+    // Load theme preference from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    const isLight = savedTheme === 'light';
+    setIsDarkMode(!isLight);
+    document.documentElement.classList.toggle('light', isLight);
+    // Fetch branches for PR creation
+    (async () => {
+      try {
+        const resp = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/repos/${owner}/${repo}/branches`, { withCredentials: true });
+        setBranches(resp.data);
+        setNewPR((prev) => ({ ...prev, base: resp.data.default_branch }));
+      } catch (e) {
+        console.error('Failed to load branches', e);
+      }
+    })();
   }, [owner, repo, filter]);
 
   const fetchPullRequests = async () => {
@@ -81,6 +101,14 @@ const RepoPRs = () => {
     return pr.state === 'open';
   };
 
+  const toggleTheme = () => {
+    const newIsDark = !isDarkMode;
+    setIsDarkMode(newIsDark);
+    const useLight = !newIsDark;
+    localStorage.setItem('theme', useLight ? 'light' : 'dark');
+    document.documentElement.classList.toggle('light', useLight);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-github-dark flex items-center justify-center">
@@ -108,30 +136,136 @@ const RepoPRs = () => {
   }
 
   return (
-    <div className="min-h-screen bg-github-dark">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-github-border bg-github-surface">
+      <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/dashboard')}
+                className="mr-4"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Button>
+              <Github className="w-6 h-6 text-primary mr-3" />
+              <h1 className="text-lg font-semibold github-text">
+                {owner}/{repo} - Pull Requests
+              </h1>
+            </div>
+            
+            {/* Theme Toggle Button */}
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => navigate('/dashboard')}
-              className="mr-4"
+              onClick={toggleTheme}
+              className="p-2"
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              {isDarkMode ? (
+                <Sun className="w-5 h-5 text-yellow-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-blue-500" />
+              )}
             </Button>
-            <Github className="w-6 h-6 text-primary mr-3" />
-            <h1 className="text-lg font-semibold github-text">
-              {owner}/{repo} - Pull Requests
-            </h1>
+
+          {/* Create PR Button */}
+          <Button
+            size="sm"
+            className="ml-2 github-button"
+            onClick={() => setShowCreatePR(true)}
+            title="Create Pull Request"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            New PR
+          </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Create PR Modal */}
+        {showCreatePR && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-lg github-card">
+              <CardHeader>
+                <CardTitle className="github-text">Create Pull Request</CardTitle>
+                <CardDescription className="github-text-muted">Open a PR from a branch to a base branch</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <label className="block text-sm github-text mb-1">Title</label>
+                  <input
+                    className="w-full github-input"
+                    value={newPR.title}
+                    onChange={(e) => setNewPR({ ...newPR, title: e.target.value })}
+                    placeholder="Add a title"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm github-text mb-1">Base branch</label>
+                    <select
+                      className="w-full github-input"
+                      value={newPR.base}
+                      onChange={(e) => setNewPR({ ...newPR, base: e.target.value })}
+                    >
+                      {(branches.branches || []).map(b => (
+                        <option key={b.name} value={b.name}>{b.name}{b.protected ? ' (protected)' : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm github-text mb-1">Head branch</label>
+                    <select
+                      className="w-full github-input"
+                      value={newPR.head}
+                      onChange={(e) => setNewPR({ ...newPR, head: e.target.value })}
+                    >
+                      <option value="">Select head branch</option>
+                      {(branches.branches || []).map(b => (
+                        <option key={b.name} value={b.name}>{b.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm github-text mb-1">Description</label>
+                  <Textarea
+                    placeholder="Write a description..."
+                    value={newPR.body}
+                    onChange={(e) => setNewPR({ ...newPR, body: e.target.value })}
+                    className="w-full"
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button variant="outline" onClick={() => setShowCreatePR(false)} disabled={creatingPR}>Cancel</Button>
+                  <Button className="github-button" onClick={async () => {
+                    if (!newPR.title || !newPR.head || !newPR.base) return;
+                    try {
+                      setCreatingPR(true);
+                      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/repos/${owner}/${repo}/pulls`, newPR, { withCredentials: true });
+                      setShowCreatePR(false);
+                      setNewPR({ title: '', base: 'main', head: '', body: '' });
+                      fetchPullRequests();
+                    } catch (err) {
+                      console.error('Error creating PR:', err);
+                      alert('Failed to create pull request');
+                    } finally {
+                      setCreatingPR(false);
+                    }
+                  }} disabled={creatingPR}>
+                    {creatingPR ? 'Creating...' : 'Create PR'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         <div className="mb-8">
           <h2 className="text-2xl font-bold github-text mb-2">Pull Requests</h2>
           <p className="github-text-muted mb-4">

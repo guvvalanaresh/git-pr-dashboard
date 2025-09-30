@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Github, LogOut, GitBranch, Star, Eye, User, Users, GitFork, ChevronDown } from 'lucide-react';
+import { Github, LogOut, GitBranch, Star, Eye, User, Users, GitFork, ChevronDown, Moon, Sun } from 'lucide-react';
 import axios from 'axios';
 
 const Dashboard = () => {
@@ -12,10 +12,16 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
+    // Load theme preference from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    const isLight = savedTheme === 'light';
+    setIsDarkMode(!isLight);
+    document.documentElement.classList.toggle('light', isLight);
   }, []);
 
   // Close dropdown when clicking outside
@@ -78,6 +84,14 @@ const Dashboard = () => {
     navigate(`/repo/${repo.owner.login}/${repo.name}/files`);
   };
 
+  const toggleTheme = () => {
+    const newIsDark = !isDarkMode;
+    setIsDarkMode(newIsDark);
+    const useLight = !newIsDark;
+    localStorage.setItem('theme', useLight ? 'light' : 'dark');
+    document.documentElement.classList.toggle('light', useLight);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-github-dark flex items-center justify-center">
@@ -93,21 +107,21 @@ const Dashboard = () => {
     return (
       <div className="min-h-screen bg-github-dark flex items-center justify-center">
         <Card className="w-full max-w-md github-card">
-          <CardContent className="text-center p-6">
-            <p className="text-destructive mb-4">{error}</p>
-            <Button onClick={fetchRepositories} variant="outline">
-              Try Again
-            </Button>
-          </CardContent>
+            <CardContent className="text-center p-6">
+              <p className="text-destructive mb-4">{error}</p>
+              <Button onClick={fetchData} variant="outline">
+                Try Again
+              </Button>
+            </CardContent>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-github-dark">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-github-border bg-github-surface">
+      <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -115,8 +129,24 @@ const Dashboard = () => {
               <h1 className="text-xl font-semibold github-text">GitHub PR Dashboard</h1>
             </div>
             
-            {/* Profile Dropdown */}
-            <div className="relative profile-dropdown">
+            <div className="flex items-center space-x-3">
+              {/* Theme Toggle Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className="p-2"
+                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDarkMode ? (
+                  <Sun className="w-5 h-5 text-yellow-500" />
+                ) : (
+                  <Moon className="w-5 h-5 text-blue-500" />
+                )}
+              </Button>
+              
+              {/* Profile Dropdown */}
+              <div className="relative profile-dropdown">
               <Button 
                 variant="ghost" 
                 size="sm"
@@ -153,6 +183,7 @@ const Dashboard = () => {
                   </div>
                 </div>
               )}
+              </div>
             </div>
           </div>
         </div>

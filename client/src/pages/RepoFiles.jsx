@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Github, ArrowLeft, File, Folder, Code, Image, FileText, Archive } from 'lucide-react';
+import { Github, ArrowLeft, File, Folder, Code, Image, FileText, Archive, Moon, Sun } from 'lucide-react';
 import axios from 'axios';
 
 const RepoFiles = () => {
@@ -12,9 +12,15 @@ const RepoFiles = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPath, setCurrentPath] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
   useEffect(() => {
     fetchFiles();
+    // Load theme preference from localStorage
+    const savedTheme = localStorage.getItem('theme');
+    const isLight = savedTheme === 'light';
+    setIsDarkMode(!isLight);
+    document.documentElement.classList.toggle('light', isLight);
   }, [owner, repo, currentPath]);
 
   const fetchFiles = async () => {
@@ -89,6 +95,14 @@ const RepoFiles = () => {
     }
   };
 
+  const toggleTheme = () => {
+    const newIsDark = !isDarkMode;
+    setIsDarkMode(newIsDark);
+    const useLight = !newIsDark;
+    localStorage.setItem('theme', useLight ? 'light' : 'dark');
+    document.documentElement.classList.toggle('light', useLight);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-github-dark flex items-center justify-center">
@@ -116,29 +130,46 @@ const RepoFiles = () => {
   }
 
   return (
-    <div className="min-h-screen bg-github-dark">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-github-border bg-github-surface">
+      <header className="border-b border-border bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center h-16">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackClick}
+                className="mr-4"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+              <Github className="w-6 h-6 text-primary mr-3" />
+              <h1 className="text-lg font-semibold github-text">
+                {owner}/{repo} - Files
+              </h1>
+              {currentPath && (
+                <span className="ml-2 text-sm github-text-muted">
+                  / {currentPath}
+                </span>
+              )}
+            </div>
+            
+            {/* Theme Toggle Button */}
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleBackClick}
-              className="mr-4"
+              onClick={toggleTheme}
+              className="p-2"
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+              {isDarkMode ? (
+                <Sun className="w-5 h-5 text-yellow-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-blue-500" />
+              )}
             </Button>
-            <Github className="w-6 h-6 text-primary mr-3" />
-            <h1 className="text-lg font-semibold github-text">
-              {owner}/{repo} - Files
-            </h1>
-            {currentPath && (
-              <span className="ml-2 text-sm github-text-muted">
-                / {currentPath}
-              </span>
-            )}
           </div>
         </div>
       </header>

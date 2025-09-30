@@ -25,6 +25,28 @@
     --ring: 142 76% 36%;
     --radius: 0.5rem;
   }
+
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 210 40% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 40% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 40% 8%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 20.2% 35%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 210 40% 8%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 40% 90%;
+    --input: 210 40% 90%;
+    --ring: 142 76% 36%;
+  }
 }
 
 @layer base {
@@ -34,12 +56,13 @@
   body {
     @apply bg-background text-foreground;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
-/* GitHub-inspired custom styles */
+/* GitHub-inspired custom styles (variable-driven for theming) */
 .github-card {
-  @apply bg-github-surface border border-github-border rounded-lg p-4 hover:border-github-muted transition-colors;
+  @apply bg-card border border-border rounded-lg p-4 hover:border-muted transition-colors;
 }
 
 .github-button {
@@ -51,13 +74,13 @@
 }
 
 .github-input {
-  @apply bg-github-surface border border-github-border text-github-text placeholder-github-muted rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  @apply bg-card border border-input text-foreground placeholder-muted-foreground rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
 }
 
 .github-text {
-  @apply text-github-text;
+  @apply text-foreground;
 }
 
 .github-text-muted {
-  @apply text-github-muted;
+  @apply text-muted-foreground;
 }

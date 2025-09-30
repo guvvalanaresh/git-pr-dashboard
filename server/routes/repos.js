@@ -126,6 +126,75 @@ router.get('/:owner/:repo/pulls', requireAuth, createOctokit, async (req, res) =
   }
 });
 
+// List branches for a repository (to aid PR creation)
+router.get('/:owner/:repo/branches', requireAuth, createOctokit, async (req, res) => {
+  try {
+    const { owner, repo } = req.params;
+
+    const [{ data: repoInfo }, { data: branches }] = await Promise.all([
+      req.octokit.rest.repos.get({ owner, repo }),
+      req.octokit.rest.repos.listBranches({ owner, repo, per_page: 100 })
+    ]);
+
+    res.json({
+      default_branch: repoInfo.default_branch,
+      branches: branches.map(b => ({ name: b.name, protected: b.protected }))
+    });
+  } catch (error) {
+    console.error('Error fetching branches:', error);
+    res.status(500).json({ error: 'Failed to fetch branches', message: error.message });
+  }
+});
+
+// Create a pull request
+router.post('/:owner/:repo/pulls', requireAuth, createOctokit, async (req, res) => {
+  try {
+    const { owner, repo } = req.params;
+    const { title, head, base, body, draft = false, maintainer_can_modify = true } = req.body || {};
+
+    if (!title || !head || !base) {
+      return res.status(400).json({ error: 'Missing required fields: title, head, base' });
+    }
+
+    // Validate that base and head branches exist in the repo
+    const [baseOk, headOk] = await Promise.all([
+      req.octokit.rest.repos.getBranch({ owner, repo, branch: base }).then(() => true).catch(() => false),
+      req.octokit.rest.repos.getBranch({ owner, repo, branch: head }).then(() => true).catch(() => false),
+    ]);
+
+    if (!baseOk || !headOk) {
+      return res.status(400).json({
+        error: 'Invalid branch selection',
+        message: `${!baseOk ? 'Base' : ''}${!baseOk && !headOk ? ' and ' : ''}${!headOk ? 'Head' : ''} branch not found in ${owner}/${repo}`,
+      });
+    }
+
+    if (base === head) {
+      return res.status(400).json({ error: 'Base and head cannot be the same branch' });
+    }
+
+    const { data: pr } = await req.octokit.rest.pulls.create({
+      owner,
+      repo,
+      title,
+      head,
+      base,
+      body,
+      draft,
+      maintainer_can_modify,
+    });
+
+    res.status(201).json(pr);
+  } catch (error) {
+    console.error('Error creating pull request:', error);
+    const status = error?.status || 500;
+    res.status(status).json({ 
+      error: 'Failed to create pull request',
+      message: error.message 
+    });
+  }
+});
+
 // Get repository files/tree
 router.get('/:owner/:repo/files', requireAuth, createOctokit, async (req, res) => {
   try {
