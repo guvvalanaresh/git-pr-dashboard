@@ -3,6 +3,14 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
+import express from 'express';
+import session from 'express-session';
+import passport from 'passport';
+import { Strategy as GitHubStrategy } from 'passport-github2';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -20,13 +28,6 @@ dotenv.config({ path: join(__dirname, '.env') });
 //   process.env.CLIENT_URL = 'https://git-pr-dashboard.vercel.app';
 // }
 
-import express from 'express';
-import session from 'express-session';
-import passport from 'passport';
-import { Strategy as GitHubStrategy } from 'passport-github2';
-import cors from 'cors';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 
 // Configure GitHub OAuth Strategy
 passport.use(new GitHubStrategy({
@@ -92,6 +93,7 @@ app.use(limiter);
 app.use(cors({
   origin: ['https://git-pr-dashboard.vercel.app'],
   credentials: true,
+  optionsSuccessStatus: 200,
 }));
 
 // Body parsing middleware
@@ -104,9 +106,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,
+    secure: true,          // must be true for HTTPS
     httpOnly: true,
-    sameSite: 'none',
+    sameSite: 'none',      // must be 'none' for cross-site cookies
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
 }));
