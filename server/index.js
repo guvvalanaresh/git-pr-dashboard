@@ -13,11 +13,11 @@ dotenv.config({ path: join(__dirname, '.env') });
 if (!process.env.GITHUB_CLIENT_ID) {
   process.env.GITHUB_CLIENT_ID = 'Ov23liqi7sNkN7HIMGfs';
   process.env.GITHUB_CLIENT_SECRET = 'c5184b459e70eb0b0b78944107afc3b0d9a0fec1';
-  process.env.GITHUB_CALLBACK_URL = 'http://localhost:3001/auth/github/callback';
+  process.env.GITHUB_CALLBACK_URL = 'https://git-pr-dashboard.onrender.com/auth/github/callback';
   process.env.SESSION_SECRET = 'Q9kPz$e7mJ!rU2xN8vG@hL3tW6sXzF1a';
   process.env.PORT = '3001';
   process.env.NODE_ENV = 'development';
-  process.env.CLIENT_URL = 'http://localhost:5173';
+  process.env.CLIENT_URL = 'https://git-pr-dashboard.vercel.app';
 }
 
 import express from 'express';
