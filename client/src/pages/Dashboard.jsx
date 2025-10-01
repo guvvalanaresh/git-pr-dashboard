@@ -42,15 +42,9 @@ const Dashboard = () => {
     try {
       setLoading(true);
       const [reposResponse, statsResponse, userResponse] = await Promise.all([
-        axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/repos`, {
-          withCredentials: true
-        }),
-        axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/repos/stats`, {
-          withCredentials: true
-        }),
-        axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/me`, {
-          withCredentials: true
-        })
+        axios.get(`${import.meta.env.VITE_API_URL}/api/repos`, {withCredentials: true}),
+        axios.get(`${import.meta.env.VITE_API_URL}/api/repos/stats`, {withCredentials: true}),
+        axios.get(`${import.meta.env.VITE_API_URL}/auth/me`, {withCredentials: true})
       ]);
       
       setRepositories(reposResponse.data);

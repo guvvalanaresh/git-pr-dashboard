@@ -90,7 +90,7 @@ app.use(limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: [process.env.CLIENT_URL || 'http://localhost:5173', 'http://localhost:5174'],
+  origin: ['https://git-pr-dashboard.vercel.app'],
   credentials: true,
 }));
 
@@ -100,12 +100,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     httpOnly: true,
+    sameSite: 'none',
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
 }));
