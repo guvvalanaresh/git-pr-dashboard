@@ -11,6 +11,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
+// Import routes
+import authRoutes from './routes/auth.js';
+import repoRoutes from './routes/repos.js';
+import commentRoutes from './routes/comments.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -61,25 +66,26 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// Import routes
-import authRoutes from './routes/auth.js';
-import repoRoutes from './routes/repos.js';
-import commentRoutes from './routes/comments.js';
+
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+app.set("trust proxy", 1); // ✅ trust Render proxy for secure cookies
+
 // Security middleware
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  },
+  contentSecurityPolicy:false,
+  // contentSecurityPolicy: {
+  //   directives: {
+  //     defaultSrc: ["'self'"],
+  //     styleSrc: ["'self'", "'unsafe-inline'"],
+  //     scriptSrc: ["'self'"],
+  //     imgSrc: ["'self'", "data:", "https:"],
+  //   },
+  // },
 }));
+
 
 // Rate limiting
 const limiter = rateLimit({
@@ -91,9 +97,11 @@ app.use(limiter);
 
 // CORS configuration
 app.use(cors({
-  origin: ['https://git-pr-dashboard.vercel.app'],
+  origin: [
+    "http://localhost:5173",
+    "https://git-pr-dashboard.vercel.app"
+  ],
   credentials: true,
-  optionsSuccessStatus: 200,
 }));
 
 // Body parsing middleware
@@ -106,9 +114,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: true,          // must be true for HTTPS
     httpOnly: true,
-    sameSite: 'none',      // must be 'none' for cross-site cookies
+    secure: process.env.NODE_ENV === "production", // true on Render
+    sameSite: "none", // ✅ needed for cross-site cookies
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
   },
 }));
