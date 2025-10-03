@@ -206,7 +206,7 @@ const RepoFiles = () => {
                     <div className="flex items-center space-x-3">
                       {getFileIcon(file)}
                       <div>
-                        <h3 className="github-text font-medium">
+                        <h3 data-testid={`file-${file.name}`} className="github-text font-medium">
                           {file.name}
                         </h3>
                         {file.type === 'file' && (

@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">87.5% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/8</span>
+                <span class='fraction'>7/8</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/4</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/16</span>
+                <span class='fraction'>16/16</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -145,31 +145,31 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -222,31 +222,31 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Github, Moon, Sun } from 'lucide-react';
 &nbsp;
-const Login = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-  const [isDarkMode, setIsDarkMode] = <span class="cstat-no" title="statement not covered" >useState(true);</span>
+const Login = () =&gt; {
+  const [isDarkMode, setIsDarkMode] = useState(true);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  useEffect(<span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+  useEffect(() =&gt; {
     // Load theme preference from localStorage
-    const savedTheme = <span class="cstat-no" title="statement not covered" >localStorage.getItem('theme');</span>
-    const isLight = <span class="cstat-no" title="statement not covered" >savedTheme === 'light';</span>
-<span class="cstat-no" title="statement not covered" >    setIsDarkMode(!isLight);</span>
-<span class="cstat-no" title="statement not covered" >    document.documentElement.classList.toggle('light', isLight);</span>
+    const savedTheme = localStorage.getItem('theme');
+    const isLight = savedTheme === 'light';
+    setIsDarkMode(!isLight);
+    document.documentElement.classList.toggle('light', isLight);
   }, []);
 &nbsp;
-  const handleGitHubLogin = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+  const handleGitHubLogin = () =&gt; {
     // Redirect to backend OAuth endpoint
-<span class="cstat-no" title="statement not covered" >    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/github`;</span>
+    window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/auth/github`;
   };
 &nbsp;
-  const toggleTheme = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
-    const newIsDark = <span class="cstat-no" title="statement not covered" >!isDarkMode;</span>
-<span class="cstat-no" title="statement not covered" >    setIsDarkMode(newIsDark);</span>
-    const useLight = <span class="cstat-no" title="statement not covered" >!newIsDark;</span>
-<span class="cstat-no" title="statement not covered" >    localStorage.setItem('theme', useLight ? 'light' : 'dark');</span>
-<span class="cstat-no" title="statement not covered" >    document.documentElement.classList.toggle('light', useLight);</span>
+  const toggleTheme = () =&gt; {
+    const newIsDark = !isDarkMode;
+    setIsDarkMode(newIsDark);
+    const useLight = !newIsDark;
+    localStorage.setItem('theme', useLight ? 'light' : <span class="branch-1 cbranch-no" title="branch not covered" >'dark')</span>;
+    document.documentElement.classList.toggle('light', useLight);
   };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;div className="min-h-screen bg-background flex items-center justify-center p-4"&gt;
       {/* Theme Toggle Button */}
       &lt;Button
@@ -301,7 +301,7 @@ export default Login;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-30T09:43:56.172Z
+                at 2025-10-03T13:10:35.522Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
