@@ -15,7 +15,6 @@ afterAll(() => {
   console.warn.mockRestore();
 });
 
-
 const mockNavigate = jest.fn();
 jest.mock("react-router-dom", () => {
   const actual = jest.requireActual("react-router-dom");
@@ -36,16 +35,31 @@ describe("Dashboard Component", () => {
         <Dashboard />
       </MemoryRouter>
     );
-    expect(
-      screen.getByText(/Loading repositories/i)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Loading repositories/i)).toBeInTheDocument();
   });
 
-  it("renders data after fetch", async () => {
+  it("renders data after fetch and handles navigation", async () => {
+    // Mock API responses
     axios.get
-      .mockResolvedValueOnce({ data: [{ id: 1, name: "repo1", owner: { login: "user1" }, stargazers_count: 10, watchers_count: 5 }] }) // repos
-      .mockResolvedValueOnce({ data: { totalRepos: 1, totalStars: 10, totalForks: 2, followers: 5, following: 3 } }) // stats
-      .mockResolvedValueOnce({ data: { username: "testuser", displayName: "Test User", avatar: "avatar.png" } }); // user
+      .mockResolvedValueOnce({
+        data: [
+          {
+            id: 1,
+            name: "repo1",
+            owner: { login: "user1" },
+            stargazers_count: 10,
+            watchers_count: 5,
+            language: "JavaScript",
+            private: true,
+          },
+        ],
+      }) // repos
+      .mockResolvedValueOnce({
+        data: { totalRepos: 1, totalStars: 10, totalForks: 2, followers: 5, following: 3 },
+      }) // stats
+      .mockResolvedValueOnce({
+        data: { username: "testuser", displayName: "Test User", avatar: "avatar.png" },
+      }); // user
 
     render(
       <MemoryRouter>
@@ -53,31 +67,51 @@ describe("Dashboard Component", () => {
       </MemoryRouter>
     );
 
-    // Wait for repo name
-    await waitFor(() =>
-      expect(screen.getByText(/repo1/)).toBeInTheDocument()
-    );
+    // Wait for repository name to appear
+    await waitFor(() => expect(screen.getByText(/repo1/i)).toBeInTheDocument());
 
-    // Check stats and repos section
-    // expect(screen.getAllByText(/Repositories/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Repositories/i).forEach(el => {
-        expect(el).toBeInTheDocument();
-    }));
+    // Check stats cards (pick first match if multiple)
+    const statsTexts = ["Repositories", "Total Stars", "Total Forks", "Followers", "Following"];
+    statsTexts.forEach((text) => {
+      const element = screen.getAllByText(new RegExp(text, "i"))[0];
+      expect(element).toBeInTheDocument();
+    });
 
-    // Click on "View PRs" button
+    // Check repo action buttons
     fireEvent.click(screen.getByText(/View PRs/i));
     expect(mockNavigate).toHaveBeenCalledWith("/repo/user1/repo1");
 
-    // Click on "View Files" button
     fireEvent.click(screen.getByText(/View Files/i));
     expect(mockNavigate).toHaveBeenCalledWith("/repo/user1/repo1/files");
+
+    // Check private badge
+    expect(screen.getByText(/Private/i)).toBeInTheDocument();
   });
 
-  it("handles logout", async () => {
+  it("handles empty repositories and fallback UI", async () => {
     axios.get
       .mockResolvedValueOnce({ data: [] }) // repos
-      .mockResolvedValueOnce({ data: { totalRepos: 0, totalStars: 0, totalForks: 0, followers: 0, following: 0 } }) // stats
+      .mockResolvedValueOnce({
+        data: { totalRepos: 0, totalStars: 0, totalForks: 0, followers: 0, following: 0 },
+      }) // stats
       .mockResolvedValueOnce({ data: { username: "testuser" } }); // user
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText(/No repositories found/i)).toBeInTheDocument());
+  });
+
+  it("handles profile dropdown and logout", async () => {
+    axios.get
+      .mockResolvedValueOnce({ data: [] }) // repos
+      .mockResolvedValueOnce({
+        data: { totalRepos: 0, totalStars: 0, totalForks: 0, followers: 0, following: 0 },
+      }) // stats
+      .mockResolvedValueOnce({ data: { username: "testuser", displayName: "Test User" } }); // user
 
     axios.post.mockResolvedValueOnce({}); // logout
 
@@ -87,21 +121,19 @@ describe("Dashboard Component", () => {
       </MemoryRouter>
     );
 
-    // Wait for user data
-    await waitFor(() =>
-      expect(screen.getAllByText(/testuser/i)[0]).toBeInTheDocument()
-    );
+    // Wait for username
+    await waitFor(() => expect(screen.getAllByText(/testuser/i)[0]).toBeInTheDocument());
 
-    // Open dropdown (use first match)
-    fireEvent.click(screen.getAllByText(/testuser/i)[0]);
+    // Open profile dropdown
+    const usernameElement = screen.getAllByText(/testuser/i)[0];
+    fireEvent.click(usernameElement);
+
+    // Click logout
     fireEvent.click(screen.getByText(/Logout/i));
-
-    await waitFor(() =>
-      expect(mockNavigate).toHaveBeenCalledWith("/")
-    );
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith("/"));
   });
 
-  it("shows error state", async () => {
+  it("shows error state on fetch failure and retries", async () => {
     axios.get.mockRejectedValue(new Error("API failed"));
 
     render(
@@ -110,8 +142,31 @@ describe("Dashboard Component", () => {
       </MemoryRouter>
     );
 
-    await waitFor(() =>
-      expect(screen.getByText(/Failed to fetch data/i)).toBeInTheDocument()
+    await waitFor(() => expect(screen.getByText(/Failed to fetch data/i)).toBeInTheDocument());
+
+    // Retry button click triggers 3 more API calls
+    fireEvent.click(screen.getByText(/Try Again/i));
+    expect(axios.get).toHaveBeenCalledTimes(6);
+  });
+
+  it("toggles theme", async () => {
+    axios.get
+      .mockResolvedValueOnce({ data: [] }) // repos
+      .mockResolvedValueOnce({
+        data: { totalRepos: 0, totalStars: 0, totalForks: 0, followers: 0, following: 0 },
+      }) // stats
+      .mockResolvedValueOnce({ data: { username: "testuser" } }); // user
+
+    render(
+      <MemoryRouter>
+        <Dashboard />
+      </MemoryRouter>
     );
+
+    await waitFor(() => expect(screen.getByText(/No repositories found/i)).toBeInTheDocument());
+
+    const toggleBtn = screen.getByTitle(/Switch to light mode/i);
+    fireEvent.click(toggleBtn);
+    expect(localStorage.getItem("theme")).toBe("light");
   });
 });
